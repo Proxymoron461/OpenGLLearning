@@ -56,11 +56,13 @@ void draw_line_pair(GLfloat scale_factor, GLfloat x, GLfloat y) {
 
 }
 
+// Base case - draw triangles rather than line pairs along the line
 void draw_triangles_along_line(GLfloat start_x, GLfloat start_y, GLfloat end_x, GLfloat end_y) {
     // TODO
 }
 
-void draw_line_pair_along_line(GLfloat start_x, GLfloat start_y, GLfloat end_x, GLfloat end_y) {
+// Recursive method to draw line pairs along the line
+void draw_line_pair_along_line(GLfloat start_x, GLfloat start_y, GLfloat end_x, GLfloat end_y, int depth) {
     // TODO
 }
 
@@ -97,7 +99,7 @@ void display()
 void init()
 {
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	   glLoadIdentity();
 	gluOrtho2D(0, 1000, 0, 1000);
 	glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
 }
