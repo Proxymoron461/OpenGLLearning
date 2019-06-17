@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA);
 	glutInitWindowSize(512, 512);
 	glutInitWindowPosition(50, 50);
-	glutCreateWindow("Rotate");
+	glutCreateWindow("Squares");
 	glutDisplayFunc(display);
 
 	init();

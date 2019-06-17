@@ -12,9 +12,9 @@ void draw_triangle()
 	// in model coordinates centred at (0,0)
 	static GLfloat vertex[3][2] =
 		{
-			{-1.0f, -1.0f},
-			{1.0f, -1.0f},
-			{0.0f, 1.0f}
+			{ -1.0f, -1.0f },
+	        {  1.0f, -1.0f },
+	        {  0.0f,  1.0f }
 		};
 
 	glBegin(GL_LINE_LOOP);
