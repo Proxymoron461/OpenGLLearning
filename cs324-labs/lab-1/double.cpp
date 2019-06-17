@@ -30,9 +30,9 @@ int main(int argc, char* argv[])
 	glutInit(&argc, argv); 
 	
 	// set the GL display mode: double buffering and RGBA colour mode
-	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA); // flags bitwise OR'd together
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA); // flags bitwise OR'd together
 	
-	glutInitWindowSize(512, 512); // window size
+	glutInitWindowSize(512, 512); // window size - must do BEFORE glutCreateWindow()
 	glutInitWindowPosition(50, 50); // where on screen
 
 	glutCreateWindow("Double Buffer"); 
