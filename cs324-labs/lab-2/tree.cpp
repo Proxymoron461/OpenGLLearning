@@ -38,14 +38,9 @@ void display()
 		// translate it to where we want it
 		glTranslatef(500.0f, 500.0f, 0.0f);
 
-		// rotate anticlockwise in-plane by 60 degrees
-		glRotatef(80.0f, 0.0f, 0.0f, 1.0f);
-
-		// scale it up
-		glScalef(250.0f, 250.0f, 1.0f);
-
-		// render primitives
-		draw_triangle();
+		for (size_t i = 0; i < 1000000; i++) {
+            
+        }
 
 	glPopMatrix(); // done with stack
 
