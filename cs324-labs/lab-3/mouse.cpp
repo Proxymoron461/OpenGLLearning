@@ -6,6 +6,7 @@
 
 #include <stddef.h>
 #include <iostream>
+#include <cmath>
 
 // values controlled by fast keys
 GLfloat g_angle = 0.0f;
@@ -26,24 +27,36 @@ GLfloat triangle_y = 500.0f;
 int world_width = 1000;
 int world_height = 1000;
 
-float mouse_x = 0.0f;
-float mouse_y = 0.0f;
+int mouse_x = 0;
+int mouse_y = 0;
 
-float* normalise_2d_mouse_window_coords(int window_coords[]) {
+// float* normalise_2d_mouse_window_coords(int window_coords[]) {
+// 	float window_width = float(glutGet(GLUT_WINDOW_WIDTH));
+// 	float window_height = float(glutGet(GLUT_WINDOW_HEIGHT));
+// 	static float coords [2] = { float(window_coords[0]) / window_width, (window_height - float(window_coords[1])) / window_height };
+// 	return coords;
+// }
+//
+// int* world_coords_from_normalised_coords(float norm_coords[]) {
+// 	static int coords [2] = { int(norm_coords[0] * float(world_width)), int(norm_coords[1] * float(world_height)) };
+// 	return coords;
+// }
+//
+// int* fix_mouse_coordinates(int x, int y) {
+// 	static int mouse_coords [2] = { x, y };
+// 	return world_coords_from_normalised_coords(normalise_2d_mouse_window_coords(mouse_coords));
+// }
+
+int fix_mouse_x(int x) {
 	float window_width = float(glutGet(GLUT_WINDOW_WIDTH));
+
+	return int((float(x) / window_width) * float(world_width));
+}
+
+int fix_mouse_y(int y) {
 	float window_height = float(glutGet(GLUT_WINDOW_HEIGHT));
-	static float coords [2] = { float(window_coords[0]) / window_width, (window_height - float(window_coords[1])) / window_height };
-	return coords;
-}
 
-int* world_coords_from_normalised_coords(float norm_coords[]) {
-	static int coords [2] = { int(norm_coords[0] * float(world_width)), int(norm_coords[1] * float(world_height)) };
-	return coords;
-}
-
-int* fix_mouse_coordinates(int x, int y) {
-	static int mouse_coords [2] = { x, y };
-	return world_coords_from_normalised_coords(normalise_2d_mouse_window_coords(mouse_coords));
+	return int(((window_height - float(y)) / window_height) * float(world_height));
 }
 
 void draw_triangle()
@@ -51,9 +64,9 @@ void draw_triangle()
 	// in model coordinates centred at (0,0)
 	static GLfloat vertex[3][2] =
 		{
-			{ -1.0f, -1.0f },
-			{  1.0f, -1.0f },
-			{  0.0f,  1.0f }
+			{ -1.0f, -1.0f },  // Bottom left
+			{  1.0f, -1.0f },  // Bottom right
+			{  0.0f,  1.0f }   // Top
 		};
 
 	glBegin(GL_LINE_LOOP);
@@ -67,18 +80,18 @@ void draw_mouse_cursor() {
 	static int cursor_width = cursor_size / 2;
 	static int cursor_height = cursor_width;
 
-	//int mouse_coords [2];
-	int* mouse_coords = fix_mouse_coordinates(mouse_x, mouse_y);
-	int mouse_x = mouse_coords[0];
-	int mouse_y = mouse_coords[1];
+	// int x = fix_mouse_x(mouse_x);
+	// int y = fix_mouse_y(mouse_y);
+	int x = mouse_x;
+	int y = mouse_y;
 
-	// Draw mouse position
+	// Draw mouse position, using a crossed pair of lines
 	glBegin(GL_LINES);
-		glVertex2i(mouse_x - cursor_width, mouse_y + cursor_height);
-		glVertex2i(mouse_x + cursor_width, mouse_y - cursor_height);
+		glVertex2i(x - cursor_width, y + cursor_height);
+		glVertex2i(x + cursor_width, y - cursor_height);
 
-		glVertex2i(mouse_x - cursor_width, mouse_y - cursor_height);
-		glVertex2i(mouse_x + cursor_width, mouse_y + cursor_height);
+		glVertex2i(x - cursor_width, y - cursor_height);
+		glVertex2i(x + cursor_width, y + cursor_height);
 	glEnd();
 }
 
@@ -92,7 +105,13 @@ void display()
 	glPushMatrix();
 		glTranslatef(triangle_x, triangle_y, 0.0f);
 		glScalef(100.0f, 100.0f, 1.0f);
-		glRotatef(g_angle, 0.0f, 0.0f, 1.0f);
+
+		// Rotate triangle towards mouse
+		static const float RAD_TO_DEG = 180.0f/(4 * atan(1));
+		g_angle = RAD_TO_DEG * atan2((triangle_y - mouse_y), (triangle_x - mouse_x));
+		glRotatef(g_angle + 90.0f, 0.0f, 0.0f, 1.0f);
+		std::cerr << "g_angle: "<< g_angle << std::endl;
+
 		draw_triangle();
 	glPopMatrix(); // done with stack
 
@@ -130,9 +149,8 @@ void mouse_click(int button, int state, int x, int y)
 			// float norm_window_y = (window_height - float(g_cursor_y)) / window_height;
 			// std::cerr << "\t normalised - (" << norm_window_x << ", " << norm_window_y << ")" << std::endl;
 
-			int* world_coords = fix_mouse_coordinates(g_cursor_x, g_cursor_y);
-			triangle_x = world_coords[0];
-			triangle_y = world_coords[1];
+			triangle_x = fix_mouse_x(g_cursor_x);
+			triangle_y = fix_mouse_y(g_cursor_y);
 			std::cerr << "\t final - (" << triangle_x << ", " << triangle_y << ")" << std::endl;
 
 			std::cerr << "\t cursor at (" << g_cursor_x << ", " <<
@@ -149,11 +167,17 @@ void mouse_click(int button, int state, int x, int y)
 
 void mouse_motion(int x, int y)
 {
-	std::cerr << "\t mouse is at (" << x << ", " << y << ")" << std::endl;
 	//glutPostRedisplay();
 
-	mouse_x = float(x);
-	mouse_y = float(y);
+	// Set global variables mouse_x and mouse_y to track mouse
+	// mouse_x = x;
+	// mouse_y = y;
+	mouse_x = fix_mouse_x(x);
+	mouse_y = fix_mouse_y(y);
+	std::cerr << "\t mouse (in world co-ordinates) is at (" << mouse_x << ", " << mouse_y << ")" << std::endl;
+
+	// Get glut to draw them next loop of glutMainLoop()
+	glutPostRedisplay();
 }
 
 
