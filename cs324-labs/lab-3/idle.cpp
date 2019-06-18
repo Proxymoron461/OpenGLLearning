@@ -1,7 +1,7 @@
 #ifdef __APPLE__
-#include <GLUT/glut.h> 
+#include <GLUT/glut.h>
 #else
-#include <GL/glut.h> 
+#include <GL/glut.h>
 #endif
 
 #include <stddef.h>
@@ -26,20 +26,21 @@ unsigned int make_triangle()
 {
 	static float vertex[3][2] =
 		{
-			{-1.0f, -1.0f},
-			{1.0f, -1.0f},
-			{0.0f, 1.0f}
+			{ -1.0f, -1.0f },
+			{  1.0f, -1.0f },
+			{  0.0f,  1.0f }
 		};
 
 	// request a single display list handle
-	unsigned int handle = glGenLists(1); 
+	GLuint handle = glGenLists(1);
 
 	glNewList(handle, GL_COMPILE);
 
-	glBegin(GL_LINE_LOOP); 
-		for (size_t i=0;i<3;i++)
+	glBegin(GL_LINE_LOOP);
+		for (size_t i = 0; i < 3; i++)
 			glVertex2fv(vertex[i]);
 	glEnd();
+
 	glEndList();
 
 	return handle;
@@ -49,12 +50,14 @@ unsigned int make_triangle()
 void idle()
 {
 	std::cerr << "\t idle handler called..." << std::endl;
-	//glutPostRedisplay(); // uncomment if you change any drawing state
+	g_angle += g_angle_step;
+	glutPostRedisplay(); // Drawing state changed - need to redisplay dat frame
 }
 
+// Gets called with info on visibility state (i.e. if window is visible on screen or not)
 void visibility(int vis)
 {
-	if (vis==GLUT_VISIBLE)
+	if (vis == GLUT_VISIBLE)
 	{
 		std::cerr << "\t visible" << std::endl;
 		if (g_idle_installed)
@@ -71,20 +74,22 @@ void visibility(int vis)
 
 void display()
 {
-	glClear(GL_COLOR_BUFFER_BIT); 
-	glColor3f(1.0f, 1.0f, 1.0f); 
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1.0f, 1.0f, 1.0f);
 	glLineWidth(2.0f);
 	glMatrixMode(GL_MODELVIEW);
+
 	glPushMatrix();
-		glTranslatef(500.0f+g_xoffset, 500.0f+g_yoffset, 0.0f);
+
+		glTranslatef(500.0f + g_xoffset, 500.0f + g_yoffset, 0.0f);
 		glScalef(100.0f, 100.0f, 1.0f);
-		glRotatef(g_angle, 0.0f, 0.0f, 1.0f); 
-		
+		glRotatef(g_angle, 0.0f, 0.0f, 1.0f);
+
 		// execute a pre-compiled display list
 		glCallList(g_the_triangle);
 
 	glPopMatrix(); // done with stack
-	glutSwapBuffers(); 
+	glutSwapBuffers();
 }
 
 // will get which key was pressed and x and y positions if required
@@ -132,10 +137,10 @@ void special(int key, int, int)
 
 void init()
 {
-	glMatrixMode(GL_PROJECTION); 
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(0, 1000, 0, 1000);
-	glClearColor(0.0f, 0.0f, 1.0f, 0.0f); 
+	glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
 
 	// make triangle display list
 	g_the_triangle = make_triangle();
@@ -143,22 +148,22 @@ void init()
 
 int main(int argc, char* argv[])
 {
-	glutInit(&argc, argv); 
-	glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA); 
-	glutInitWindowSize(512, 512); 
-	glutInitWindowPosition(50, 50); 
-	glutCreateWindow("Idle Test"); 
-	glutDisplayFunc(display); 
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowSize(512, 512);
+	glutInitWindowPosition(50, 50);
+	glutCreateWindow("Idle Test");
+	glutDisplayFunc(display);
 
 	// handlers for keyboard input
-	glutKeyboardFunc(keyboard); 
-	glutSpecialFunc(special); 
+	glutKeyboardFunc(keyboard);
+	glutSpecialFunc(special);
 
-	// visibility
-	glutVisibilityFunc(visibility); 
+	// visibility is called when display is not visible/minimised
+	glutVisibilityFunc(visibility);
 
-	init(); 
-	glutMainLoop(); 
+	init();
+	glutMainLoop();
 
-	return 0; 
+	return 0;
 }
